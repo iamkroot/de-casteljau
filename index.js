@@ -87,11 +87,16 @@ const mouseMove = (event) => {
 };
 
 const mouseUp = (event) => {
-  if (selected != null) selected = null;
-  else {
+  if (selected != null) {
+    if (event.ctrlKey) {
+      // delete point
+      pts.splice(pts.indexOf(selected), 1);
+    }
+    selected = null;
+  } else {
     pts.push(getMousePos(event));
-    draw();
   }
+  draw();
 };
 
 canvas.addEventListener("mousemove", mouseMove);
