@@ -42,8 +42,47 @@ const plotControlPoints = () => {
   );
 };
 
-board.add_control_point(0, 0);
-board.add_control_point(200, 0);
+const draw = () => {
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  plotCurve();
+  plotControlPoints();
+};
 
-plotCurve();
-plotControlPoints();
+const getMousePos = (event) => {
+  return {
+    x: event.clientX - canvasLeft,
+    y: event.clientY - canvasTop,
+  };
+};
+
+let selected = false;
+
+const mouseDown = (event) => {
+  const {x, y} = getMousePos(event);
+  selected = board.select_control_point(x, y) ? true: false;
+};
+
+const mouseMove = (event) => {
+  if (!selected) return;
+  const {x, y} = getMousePos(event);
+  board.move_to(x, y);
+  draw();
+};
+
+
+const mouseUp = (event) => {
+  if (selected) {
+    board.deselect();
+    selected = false;
+  } else {
+    const { x, y } = getMousePos(event);
+    board.add_control_point(x, y);
+  }
+  draw();
+};
+
+canvas.addEventListener("mousemove", mouseMove);
+canvas.addEventListener("mousedown", mouseDown);
+canvas.addEventListener("mouseup", mouseUp);
+draw();
+

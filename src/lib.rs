@@ -8,8 +8,17 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+extern crate web_sys;
+
+// A macro to provide `println!(..)`-style syntax for `console.log` logging.
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    }
+}
+
 #[wasm_bindgen]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
@@ -63,6 +72,7 @@ pub struct Board {
 #[wasm_bindgen]
 impl Board {
     pub fn new() -> Board {
+        utils::set_panic_hook();
         let control_pts = vec![
             Point {
                 x: 90f32,
@@ -103,6 +113,7 @@ impl Board {
     }
 
     pub fn draw_bezier(&mut self) {
+        self.plot_points.clear();
         for t in 0..=self.param_steps {
             let t = t as f32 / self.param_steps as f32;
             self.draw_curve(t);
@@ -166,7 +177,7 @@ impl Board {
                 self.control_points[idx].x = x;
                 self.control_points[idx].y = y;
             }
-            None => ()
+            None => (),
         }
     }
 }
