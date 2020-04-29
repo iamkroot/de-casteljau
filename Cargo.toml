@@ -1,8 +1,9 @@
 [package]
-name = "de-cateljau-wasm"
+name = "de-casteljau"
 version = "0.1.0"
 authors = ["iamkroot <kroot.patel@gmail.com>"]
 edition = "2018"
+repository = "https://github.com/iamkroot/de-casteljau"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

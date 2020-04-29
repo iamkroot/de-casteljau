@@ -1,5 +1,5 @@
-import { Board } from "de-cateljau-wasm";
-import { memory } from "de-cateljau-wasm/de_cateljau_wasm_bg";
+import { Board } from "de-casteljau";
+import { memory } from "de-casteljau/de_casteljau_bg";
 
 const board = Board.new();
 const canvasWidth = board.width();
@@ -45,9 +45,9 @@ const plotControlPoints = () => {
 
 const draw = () => {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  tDiv.textContent = "t value: " + (board.num_curve_points() - 1);
   plotCurve();
   plotControlPoints();
-  tDiv.textContent = "t value: " + (board.num_curve_points() - 1);
 };
 
 const getMousePos = (event) => {
