@@ -8,7 +8,6 @@ const canvasHeight = board.height();
 const canvas = document.getElementById("board");
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
-const { left: canvasLeft, top: canvasTop } = canvas.getBoundingClientRect();
 const ctx = canvas.getContext("2d");
 
 const drawCircle = (point, radius) => {
@@ -49,31 +48,36 @@ const draw = () => {
 };
 
 const getMousePos = (event) => {
+  const { left: canvasLeft, top: canvasTop } = canvas.getBoundingClientRect();
+
   return {
     x: event.clientX - canvasLeft,
     y: event.clientY - canvasTop,
   };
 };
 
-let selected = false;
+let isSelected = false;
 
 const mouseDown = (event) => {
-  const {x, y} = getMousePos(event);
-  selected = board.select_control_point(x, y) ? true: false;
+  const { x, y } = getMousePos(event);
+  isSelected = board.select_control_point(x, y) ? true : false;
 };
 
 const mouseMove = (event) => {
-  if (!selected) return;
-  const {x, y} = getMousePos(event);
+  if (!isSelected) return;
+  const { x, y } = getMousePos(event);
   board.move_to(x, y);
   draw();
 };
 
-
 const mouseUp = (event) => {
-  if (selected) {
-    board.deselect();
-    selected = false;
+  if (isSelected) {
+    if (event.ctrlKey) {
+      board.remove_selected();
+    } else {
+      board.deselect();
+    }
+    isSelected = false;
   } else {
     const { x, y } = getMousePos(event);
     board.add_control_point(x, y);
@@ -85,4 +89,3 @@ canvas.addEventListener("mousemove", mouseMove);
 canvas.addEventListener("mousedown", mouseDown);
 canvas.addEventListener("mouseup", mouseUp);
 draw();
-

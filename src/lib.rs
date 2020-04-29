@@ -172,12 +172,16 @@ impl Board {
     }
 
     pub fn move_to(&mut self, x: f32, y: f32) {
-        match self.selected_point {
-            Some(idx) => {
-                self.control_points[idx].x = x;
-                self.control_points[idx].y = y;
-            }
-            None => (),
+        if let Some(idx) = self.selected_point {
+            self.control_points[idx].x = x;
+            self.control_points[idx].y = y;
+        }
+    }
+
+    pub fn remove_selected(&mut self) {
+        if let Some(idx) = self.selected_point {
+            self.control_points.remove(idx);
+            self.selected_point = None;
         }
     }
 }
