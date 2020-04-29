@@ -95,5 +95,16 @@ impl Board {
     pub fn num_curve_points(&self) -> u32 {
         self.param_steps + 1
     }
-}
 
+    pub fn control_points(&self) -> *const Point {
+        self.control_points.as_ptr()
+    }
+
+    pub fn num_control_points(&self) -> u32 {
+        self.control_points.len() as u32
+    }
+
+    pub fn add_control_point(&mut self, x: f32, y: f32) {
+        self.control_points.push(Point{x, y});
+    }
+}

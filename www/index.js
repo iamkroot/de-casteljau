@@ -11,10 +11,9 @@ canvas.height = canvasHeight;
 const { left: canvasLeft, top: canvasTop } = canvas.getBoundingClientRect();
 const ctx = canvas.getContext("2d");
 
-
 const drawCircle = (point, radius) => {
   ctx.beginPath();
-  ctx.ellipse(point.x, point.y, radius, radius, 0, 0, 2 * Math.PI);
+  ctx.ellipse(point[0], point[1], radius, radius, 0, 0, 2 * Math.PI);
   ctx.stroke();
   ctx.closePath();
 };
@@ -26,17 +25,25 @@ const putPixel = (point) => {
   ctx.closePath();
 };
 
-const plotCurve = () => {
-  board.draw_bezier();
-  const numPts = board.num_curve_points();
-  const pointsPtr = board.curve_points();
-  const points = new Float32Array(memory.buffer, pointsPtr, 2 * numPts);
-
-  for (let i = 0; i < numPts; i++) {
-    putPixel(new Float32Array(memory.buffer, pointsPtr + 8 * i, 2));
+const iterPointArray = (num, ptr, callback) => {
+  for (let i = 0; i < num; i++) {
+    callback(new Float32Array(memory.buffer, ptr + 8 * i, 2));
   }
-
 };
 
-plotCurve();
+const plotCurve = () => {
+  board.draw_bezier();
+  iterPointArray(board.num_curve_points(), board.curve_points(), putPixel);
+};
 
+const plotControlPoints = () => {
+  iterPointArray(board.num_control_points(), board.control_points(), (point) =>
+    drawCircle(point, 4)
+  );
+};
+
+board.add_control_point(0, 0);
+board.add_control_point(200, 0);
+
+plotCurve();
+plotControlPoints();
