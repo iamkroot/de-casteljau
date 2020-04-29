@@ -5,6 +5,8 @@ const board = Board.new();
 const canvasWidth = board.width();
 const canvasHeight = board.height();
 
+const tDiv = document.getElementById("t-val");
+
 const canvas = document.getElementById("board");
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
@@ -45,6 +47,7 @@ const draw = () => {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
   plotCurve();
   plotControlPoints();
+  tDiv.textContent = "t value: " + (board.num_curve_points() - 1);
 };
 
 const getMousePos = (event) => {
