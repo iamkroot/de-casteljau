@@ -11,13 +11,41 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 #[derive(Clone, Copy)]
 pub struct Point {
-    x: f32,
-    y: f32,
+    pub x: f32,
+    pub y: f32,
+}
+
+impl Point {
+    fn dist_sq(&self, other: &Point) -> f32 {
+        let x = self.x - other.x;
+        let y = self.y - other.y;
+        x * x + y * y
+    }
 }
 
 impl fmt::Display for Point {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "x: {}, y: {}", self.x, self.y)
+    }
+}
+
+impl std::ops::Add for Point {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl std::ops::Mul<f32> for Point {
+    type Output = Self;
+    fn mul(self, rhs: f32) -> Self {
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
     }
 }
 
@@ -28,6 +56,8 @@ pub struct Board {
     control_points: Vec<Point>,
     plot_points: Vec<Point>,
     param_steps: u32,
+    point_radius_sq: f32,
+    selected_point: Option<usize>,
 }
 
 #[wasm_bindgen]
@@ -54,6 +84,8 @@ impl Board {
             control_points: control_pts,
             plot_points: Vec::new(),
             param_steps: 1000,
+            point_radius_sq: 16f32,
+            selected_point: None,
         }
     }
 
@@ -64,10 +96,7 @@ impl Board {
         let mut points = self.control_points.to_vec();
         for n in (2..=points.len()).rev() {
             for i in 0..n - 1 {
-                points[i] = Point {
-                    x: (1.0 - t) * points[i].x + t * points[i + 1].x,
-                    y: (1.0 - t) * points[i].y + t * points[i + 1].y,
-                }
+                points[i] = points[i] * (1.0 - t) + points[i + 1] * t
             }
         }
         self.plot_points.push(points[0])
@@ -105,6 +134,39 @@ impl Board {
     }
 
     pub fn add_control_point(&mut self, x: f32, y: f32) {
-        self.control_points.push(Point{x, y});
+        self.control_points.push(Point { x, y });
+    }
+
+    pub fn select_control_point(&mut self, x: f32, y: f32) -> Option<Point> {
+        let pt = Point { x, y };
+        for (ind, point) in self.control_points.iter().enumerate() {
+            if pt.dist_sq(point) < self.point_radius_sq {
+                self.selected_point = Some(ind);
+                return Some(*point);
+            }
+        }
+        self.selected_point = None;
+        None
+    }
+
+    pub fn get_selected(&self) -> Option<Point> {
+        match self.selected_point {
+            Some(idx) => Some(self.control_points[idx]),
+            None => None,
+        }
+    }
+
+    pub fn deselect(&mut self) {
+        self.selected_point = None;
+    }
+
+    pub fn move_to(&mut self, x: f32, y: f32) {
+        match self.selected_point {
+            Some(idx) => {
+                self.control_points[idx].x = x;
+                self.control_points[idx].y = y;
+            }
+            None => ()
+        }
     }
 }
